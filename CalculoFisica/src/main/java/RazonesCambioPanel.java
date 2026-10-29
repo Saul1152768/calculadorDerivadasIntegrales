@@ -1,3 +1,24 @@
+/*
+ * ============================================================================
+ *  RazonesCambioPanel.java
+ *  Módulo: Razones de Cambio e Interpretación Física de la Derivada
+ *  (Java 17+ / JavaFX 21). Independiente de FisicaCalculadora.java.
+ * ============================================================================
+ *  CASOS INCLUIDOS
+ *    Caso 1: Tasa de cambio instantánea cuando t → t₀
+ *            f'(t₀) ≈ [f(t₀+h) − f(t₀−h)] / (2h)           (diferencia central)
+ *    Caso 2: Razón de cambio cuando se cumple una condición B = b
+ *            1) se busca t* tal que f(t*) = b               (barrido + Newton-Raphson
+ *                                                            protegido por bisección)
+ *            2) se calcula f'(t*) con la misma diferencia central
+ *
+ *  INTEGRACIÓN (conector)
+ *    RazonesCambioPanel.integrarEn(tabPane);          // añade la pestaña a un TabPane
+ *    Tab t = RazonesCambioPanel.comoPestana();        // o recibe la pestaña lista
+ *    BorderPane p = new RazonesCambioPanel();         // o usa el panel directamente
+ * ============================================================================
+ */
+
 import javafx.geometry.Insets;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;

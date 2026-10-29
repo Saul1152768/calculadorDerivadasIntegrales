@@ -1,3 +1,29 @@
+/*
+ * ============================================================================
+ *  FisicaCalculadora.java
+ *  Calculadora de Física y Cálculo Aplicado (Java 17+ / JavaFX 21)
+ * ============================================================================
+ *  El usuario NUNCA escribe "x", "dx" ni fórmulas abstractas: trabaja con
+ *  magnitudes físicas (v₀, a, t₁, t₂, F, d₁, d₂...) y la aplicación se encarga
+ *  de convertirlas en funciones matemáticas y de aplicar el cálculo numérico.
+ *
+ *  ESTRUCTURA DEL ARCHIVO
+ *    1. MotorCalculo   -> métodos numéricos (diferencias finitas, Simpson, trapecio)
+ *    2. Perfil         -> "modelo físico": mapea parámetros físicos -> función f(t) o F(d)
+ *    3. GraficoCanvas  -> gráfico propio (curva, área sombreada, recta tangente)
+ *    4. FisicaCalculadora -> interfaz JavaFX y lógica de los 3 problemas
+ *
+ *  MAPEO FÍSICO -> NUMÉRICO (resumen)
+ *    Parámetros ingresados (v₀, a, k, ...)  --Perfil.funcion()-->  DoubleUnaryOperator v(t)
+ *    Esa función se evalúa punto a punto dentro del MotorCalculo:
+ *      - Integral:  Simpson 1/3 sobre [t₁, t₂]  (o [d₁, d₂] para el trabajo)
+ *      - Derivada:  diferencia central  [v(t+h) - v(t-h)] / (2h)  en t_exacto
+ *    Además cada Perfil trae su derivada y su primitiva analíticas SOLO para
+ *    comparar contra el resultado numérico y mostrar el error.
+ *
+ *  COMPILAR Y EJECUTAR: ver instrucciones en la respuesta / README.
+ * ============================================================================
+ */
 
 import javafx.application.Application;
 import javafx.geometry.Insets;
@@ -38,6 +64,10 @@ public class FisicaCalculadora extends Application {
     private static final int N_SIMPSON = 2000;
     // Para ∫|v| dt (la función tiene "picos" donde v cruza el cero) usamos más puntos.
     private static final int N_ABS = 20000;
+
+    // =========================================================================
+    // 1. MOTOR DE CÁLCULO NUMÉRICO
+    // =========================================================================
     static final class MotorCalculo {
         private MotorCalculo() { }
 
@@ -422,11 +452,12 @@ public class FisicaCalculadora extends Application {
         });
 
         stage.setTitle("Calculadora de Física y Cálculo Aplicado");
-        // --- Conector: la app base y el módulo de Razones de Cambio como pestañas ---
+        // --- Conector: la app base y los módulos de Razones de Cambio como pestañas ---
         Tab pestanaBase = new Tab("Cálculo aplicado", raiz);
         pestanaBase.setClosable(false);
         TabPane pestanas = new TabPane(pestanaBase);
         RazonesCambioPanel.integrarEn(pestanas);      // <- una sola línea para acoplar el módulo
+        ProblemasRazonesPanel.integrarEn(pestanas);   // <- módulo de problemas de razones relacionadas (usa BancoProblemas)
         stage.setScene(new Scene(pestanas, 1200, 800));
         stage.show();
 
