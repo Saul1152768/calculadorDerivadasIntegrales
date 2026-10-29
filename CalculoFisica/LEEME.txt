@@ -1,0 +1,8 @@
+Proyecto Maven: FisicaCalculadora.java + RazonesCambioPanel.java
+(ya conectados: FisicaCalculadora llama a RazonesCambioPanel.integrarEn(...))
+
+NetBeans: Archivo > Abrir proyecto > carpeta CalculoFisica
+Ejecutar: clic derecho en el proyecto > Run Maven > Goals: javafx:run
+(requiere internet la primera vez para bajar JavaFX)
+
+Sin internet / con el SDK ya descargado: ver instrucciones del chat (Opcion B).
