@@ -1,29 +1,4 @@
-/*
- * ============================================================================
- *  FisicaCalculadora.java
- *  Calculadora de Física y Cálculo Aplicado (Java 17+ / JavaFX 21)
- * ============================================================================
- *  El usuario NUNCA escribe "x", "dx" ni fórmulas abstractas: trabaja con
- *  magnitudes físicas (v₀, a, t₁, t₂, F, d₁, d₂...) y la aplicación se encarga
- *  de convertirlas en funciones matemáticas y de aplicar el cálculo numérico.
- *
- *  ESTRUCTURA DEL ARCHIVO
- *    1. MotorCalculo   -> métodos numéricos (diferencias finitas, Simpson, trapecio)
- *    2. Perfil         -> "modelo físico": mapea parámetros físicos -> función f(t) o F(d)
- *    3. GraficoCanvas  -> gráfico propio (curva, área sombreada, recta tangente)
- *    4. FisicaCalculadora -> interfaz JavaFX y lógica de los 3 problemas
- *
- *  MAPEO FÍSICO -> NUMÉRICO (resumen)
- *    Parámetros ingresados (v₀, a, k, ...)  --Perfil.funcion()-->  DoubleUnaryOperator v(t)
- *    Esa función se evalúa punto a punto dentro del MotorCalculo:
- *      - Integral:  Simpson 1/3 sobre [t₁, t₂]  (o [d₁, d₂] para el trabajo)
- *      - Derivada:  diferencia central  [v(t+h) - v(t-h)] / (2h)  en t_exacto
- *    Además cada Perfil trae su derivada y su primitiva analíticas SOLO para
- *    comparar contra el resultado numérico y mostrar el error.
- *
- *  COMPILAR Y EJECUTAR: ver instrucciones en la respuesta / README.
- * ============================================================================
- */
+
 
 import javafx.application.Application;
 import javafx.geometry.Insets;
@@ -60,18 +35,13 @@ import java.util.function.Function;
 
 public class FisicaCalculadora extends Application {
 
-    // Subintervalos para Simpson/trapecio (Simpson exige n par).
     private static final int N_SIMPSON = 2000;
-    // Para ∫|v| dt (la función tiene "picos" donde v cruza el cero) usamos más puntos.
+   
     private static final int N_ABS = 20000;
 
-    // =========================================================================
-    // 1. MOTOR DE CÁLCULO NUMÉRICO
-    // =========================================================================
     static final class MotorCalculo {
         private MotorCalculo() { }
 
-        /** Derivada por diferencia central: f'(x0) ≈ [f(x0+h) - f(x0-h)] / (2h). Error O(h²). */
         static double derivadaCentral(DoubleUnaryOperator f, double x0, double h) {
             return (f.applyAsDouble(x0 + h) - f.applyAsDouble(x0 - h)) / (2.0 * h);
         }
