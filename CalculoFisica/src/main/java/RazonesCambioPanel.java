@@ -35,43 +35,17 @@ public class RazonesCambioPanel extends BorderPane {
     static final class MotorDerivacion {
         private MotorDerivacion() { }
 
-        /**
-         * Derivada por diferencia central (aproximación del límite cuando h → 0):
-         *
-         *     f'(x0) ≈ [ f(x0 + h) − f(x0 − h) ] / (2h)
-         *
-         * Geométricamente es la pendiente de la secante que pasa por (x0−h) y (x0+h);
-         * al hacer h pequeño esa secante tiende a la recta tangente. El error de
-         * truncamiento es O(h²), mucho mejor que la diferencia hacia adelante O(h).
-         * Si h es demasiado pequeño (< ~1e-8) domina el error de redondeo.
-         */
         static double derivadaCentral(DoubleUnaryOperator f, double x0, double h) {
             return (f.applyAsDouble(x0 + h) - f.applyAsDouble(x0 - h)) / (2.0 * h);
         }
 
-        /** Resultado de resolver la condición f(x*) = b. */
         record Raiz(double x, int iteraciones, int pasosNewton, int pasosBiseccion,
                     double inicioIntervalo, double finIntervalo, double residuo) { }
 
-        /**
-         * Resuelve la condición B(x*) = b dentro de [xa, xb], es decir g(x) = f(x) − b = 0.
-         *
-         *  Fase 1 (barrido): se divide [xa, xb] en 2000 tramos y se busca el PRIMER cambio
-         *          de signo de g. Eso garantiza que hay una raíz dentro del intervalo
-         *          [lo, hi] encontrado (teorema del valor intermedio).
-         *  Fase 2 (refinamiento): Newton-Raphson  x ← x − g(x)/g'(x)  usando la derivada
-         *          central. Si el paso de Newton se sale del intervalo [lo, hi] (o g' ≈ 0),
-         *          se hace un paso de bisección. Así se obtiene la velocidad de Newton
-         *          (convergencia cuadrática) con la seguridad de la bisección.
-         *
-         * Devuelve null si no hay cambio de signo en el rango (la condición no se alcanza,
-         * o la curva solo "toca" b sin cruzarlo).
-         */
         static Raiz resolverCondicion(DoubleUnaryOperator f, double objetivo,
                                       double xa, double xb, double h) {
             DoubleUnaryOperator g = x -> f.applyAsDouble(x) - objetivo;
 
-            // ---- Fase 1: barrido para aislar la raíz ----
             final int N = 2000;
             double paso = (xb - xa) / N;
             double lo = Double.NaN, hi = Double.NaN;
@@ -90,7 +64,6 @@ public class RazonesCambioPanel extends BorderPane {
             }
             if (Double.isNaN(lo)) return null;
 
-            // ---- Fase 2: Newton-Raphson protegido por bisección ----
             final double inicio = lo, fin = hi;
             double glo = g.applyAsDouble(lo);
             double x = 0.5 * (lo + hi);
@@ -98,6 +71,7 @@ public class RazonesCambioPanel extends BorderPane {
             for (; it < 100; it++) {
                 double gx = g.applyAsDouble(x);
                 if (gx == 0.0) break;
+                
                 // Mantener el intervalo [lo, hi] con cambio de signo
                 if (glo * gx < 0) { hi = x; } else { lo = x; glo = gx; }
                 double tol = 1e-13 * Math.max(1.0, Math.abs(x));
@@ -118,13 +92,6 @@ public class RazonesCambioPanel extends BorderPane {
         }
     }
 
-    // =========================================================================
-    // 2. MODELOS FÍSICOS
-    // =========================================================================
-    /**
-     * Un modelo asocia parámetros físicos (s₀, v₀, k...) con una función f(t) y trae su
-     * derivada analítica solo para comparar contra el resultado numérico.
-     */
     record Modelo(String nombre, String formula,
                   String sujeto, String unidadVar, String unidadDeriv, String nombreDeriv,
                   String[] etiquetas, String[] unidades, double[] iniciales,
@@ -172,9 +139,6 @@ public class RazonesCambioPanel extends BorderPane {
         @Override public String toString() { return texto; }
     }
 
-    // =========================================================================
-    // 3. GRÁFICO: curva + recta tangente + triángulo de la pendiente
-    // =========================================================================
     static class GraficoTangente extends Pane {
         private final Canvas canvas = new Canvas();
         private DoubleUnaryOperator f;
@@ -397,9 +361,6 @@ public class RazonesCambioPanel extends BorderPane {
         }
     }
 
-    // =========================================================================
-    // 4. INTERFAZ Y LÓGICA DEL MÓDULO
-    // =========================================================================
     private final ComboBox<Caso> cmbCaso = new ComboBox<>();
     private final ComboBox<Modelo> cmbModelo = new ComboBox<>();
     private final Label lblFormula = new Label();
@@ -479,9 +440,6 @@ public class RazonesCambioPanel extends BorderPane {
         cmbCaso.getSelectionModel().selectFirst();   // dispara la primera construcción del formulario
     }
 
-    // ------------------------------------------------------------------------
-    //  Conectores de integración
-    // ------------------------------------------------------------------------
     /** Devuelve una pestaña lista para insertar en un TabPane. */
     public static Tab comoPestana() {
         Tab tab = new Tab("Razones de cambio", new RazonesCambioPanel());
@@ -494,9 +452,7 @@ public class RazonesCambioPanel extends BorderPane {
         pestanas.getTabs().add(comoPestana());
     }
 
-    // ------------------------------------------------------------------------
-    //  Formulario dinámico
-    // ------------------------------------------------------------------------
+    
     private Label etiqueta(String texto) {
         Label l = new Label(texto);
         l.setStyle("-fx-font-weight: bold; -fx-text-fill: #374151;");
@@ -563,9 +519,6 @@ public class RazonesCambioPanel extends BorderPane {
         }
     }
 
-    // ------------------------------------------------------------------------
-    //  Cálculo
-    // ------------------------------------------------------------------------
     private void calcular() {
         if (construyendo) return;
         Caso c = cmbCaso.getValue();
@@ -694,9 +647,6 @@ public class RazonesCambioPanel extends BorderPane {
         grafico.actualizar(tituloGrafico, "Tiempo t [s]", ejeY, f, tMin, tMax, true, tStar, d, true, objetivo);
     }
 
-    // ------------------------------------------------------------------------
-    //  Utilidades
-    // ------------------------------------------------------------------------
     private void mostrarError(String mensaje) {
         lblResultado.setText("—");
         lblSecundario.setText("");
